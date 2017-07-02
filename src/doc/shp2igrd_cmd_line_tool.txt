@@ -1,0 +1,110 @@
+shp2igrd 
+--------
+
+A full implementation of this command, if run in /home/josh/Downloads/PA_geol directory, may look as follows:
+
+shp2pgrd --shp ./pa_poly_dd.shp,./pa_arc_dd.shp \ --lat .00018 --lon .00018 \
+	 --igrd /home/josh/Documents/data/pa_bedrock.igrd --quiet --add-key \
+	 --index-replacer "/home/josh/Downloads/myIndexReplacer.sh convert"
+
+A bare minimum implementation may look as follows:
+
+	shp2pgrd --shp ./pa_poly_dd.shp --lat .00018 --lon .00018
+
+Here are some of the command options:
+-------------------------------------
+
+	--shp <shape file path> (required)
+		
+		The full path to a shapefile including shapefile name and extension. Please note that you may pass a
+		comma separated list of paths to this directive if you would like to parse out multiple shapefiles of 
+		polygon, linear, or point types
+
+	--lat <latitude interval> (required)
+		
+		The interval between equal latitude lines for gridded data based on polygon type shape file data
+
+	--lon <longitude interval> (required)
+	
+		The longitude interval between adjacent points in the gridded data from polygone type shape data
+
+	--dbf <dbf path> (optional)
+
+		Include this if the dbf file associated with the shapefile is in a different location or has been 
+		renamed from the shapefile name (this is technically illegal based on esri shapefile specifications). 
+		Please note that the dbf file is never referenced or used by the program unless the 
+		"--index-replacer" option is invoked
+
+	--igrd <output igrd path and name> (optional)
+
+		This allows you to specify a path and name for the output igrd file. Please note that you do not need
+		to include the "igrd" extension at the end of this option. If not specified, the program will use the 
+		first once of the shapefile names and paths for the .igrd file.
+
+	--quiet (optional)
+
+		With this option included the program will not print errors to the command line.
+
+	--error-log <path and name of conversion process error log> (optional)
+
+		Path and name of error log file for conversion process. If the quiet option is specified, there will
+		be nothing logged to this file.
+
+	--add-key (optional)
+
+		Tells the program to tack on a gzipped csv key to the end of each data type ( linear, point, gridded) 			that provides descriptions for each index used for the records. It puts the key out in the following 			format:
+
+			header1,header2,...,headerN
+			index:value1,value2,...,valueN
+			index:value1,value2,...,valueN
+			....
+
+		or in practice:
+			
+			Name,Age,Sex
+			123:John,28,M
+			19:Sarah,25,F
+
+		Note that the indexes do not necessarily need to be in any particular order. Please Note That this 			option must be accompanied by "--index-replacer" option.
+
+	--index-replacer <script to replace default record indexes> (optional)
+		
+		This is a powerful option! This allows the user to pass a script to the program to execute to replace 
+		the default ordered indexes associated with shape records with a unique index and associate each index
+		with a csv string description. shp2igrd will pass to the program the path to the dbf file and the 
+		index of the record being parsed. It expects, at a minimum, an integer short/byte sized index back, 
+		and optionally, a csv string describing the index. When no parameters are passed to program it should 
+		print out a csv header that described the csv data put out by the program. Here's what this all looks 
+		like in practice:
+
+			shp2igrd ... --index-replacer "/usr/local/bin/igrdReplacer convert"
+
+		when the program executes this script it will run the following (assuming record index of 1234):
+
+			/usr/local/bin/igrdReplacer convert "/path/to/my/dbf/file.dbf" 1234
+
+		The program expects a minimal standard out of (new index):
+
+			12
+
+		or as much as:
+
+			12 John,28,M
+
+		when the program runs the exact command you gave it with no arguments:
+
+			/usr/local/bin/igrdReplacer convert
+
+		it expects something like:
+
+			Name,Age,Sex
+
+		which is a csv header for all csv data the program will put out in the future. If the index returned 
+		by the program is not valid or even numerical, the program will default to the original shape index 
+		and report the error to the command line or specified error log file.
+
+		In the interest of efficiency the program will pre-run all the conversion process for all shape/dbf 
+		indexes and create an internal map of these so that they will be readily available when the data from 
+		the shapefiles is being converted in stored in the igrd. Long story short, the program you provide 
+		will only be run once for each shape index.
+		

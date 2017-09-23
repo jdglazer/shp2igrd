@@ -1,14 +1,11 @@
 package com.jdglazer.shp2igrd.shp;
 
-import java.io.IOException;
-
 import org.junit.Test;
-
 import junit.framework.TestCase;
 
 public class PolylineShapeFileTest extends TestCase {
 	
-	private static PolylineShapeFile psf;
+	private PolylineShapeFile psf;
 	
 	@Override
 	public void setUp() {
@@ -20,7 +17,11 @@ public class PolylineShapeFileTest extends TestCase {
 	}
 	
 	@Test
-	public static void verifyParseability() {
+	public void tests() {
+		verifyParseability();
+	}
+	
+	public void verifyParseability() {
 		try {
 			assertEquals("Invalid max latitude for record", psf.maxLat(1032), 41.79920, .00001 );
 			assertEquals("Invalid max longitude for record", psf.maxLon(1032), -75.07654, .00001 );
@@ -35,7 +36,4 @@ public class PolylineShapeFileTest extends TestCase {
 		
 	}
 	
-	public static void main( String [] args ) throws IOException, RecordOutOfBoundsException, PartOutOfBoundsException, InvalidFileTypeException {
-		verifyParseability();
-	}
 }

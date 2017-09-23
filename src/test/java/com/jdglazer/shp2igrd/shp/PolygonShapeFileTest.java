@@ -1,11 +1,6 @@
 package com.jdglazer.shp2igrd.shp;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Properties;
-
 import org.junit.Test;
-
 import junit.framework.TestCase;
 
 public class PolygonShapeFileTest extends TestCase {
@@ -15,12 +10,8 @@ public class PolygonShapeFileTest extends TestCase {
 	@Override
 	public void setUp() {
 		try {
-			
-			Properties properties = new Properties();
-			InputStream inputStream = new FileInputStream( "shp-parser-tests.properties" );
-			properties.load(inputStream);
-			
-			psf = new PolygonShapeFile( new ShapeFile(properties.getProperty("shp.polygon.path") ) );
+			String PSFPath = getClass().getResource("/PAgeol_dd/pageol_poly_dd.shp").getPath();
+			psf = new PolygonShapeFile( new ShapeFile( PSFPath.substring(0, PSFPath.length() - 4 ) ) );
 			
 		} catch (Exception e) {
 			fail("Failed instantiating PolygonShapeFile. Error msg: "+e.getMessage() );

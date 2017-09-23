@@ -22,6 +22,9 @@ public class IntegratedGridFile extends FileModel {
 	
 	public IntegratedGridFile( FileInputStream fis ) throws IOException {
 		super ( new FileInputStream[]{ fis } );
+		gridData = new GridData();
+		linearData = new LineData();
+		pointData = new PointData();
 	}
 	
 	public long getFileLength() {
@@ -33,7 +36,7 @@ public class IntegratedGridFile extends FileModel {
 	}
 
 	public int getGridDataOffset( ) {
-		return getIntFrom( (short) 0, FileModel.L_END, 4 );
+		return getIntFrom( (short) 0, FileModel.B_END, 4 );
 	}
 	
 	public boolean isGridDataPresent( ) {
@@ -41,7 +44,7 @@ public class IntegratedGridFile extends FileModel {
 	}
 	
 	public int getLinearDataOffset( ) {
-		return getIntFrom( (short) 0, FileModel.L_END, 8 );
+		return getIntFrom( (short) 0, FileModel.B_END, 8 );
 	}
 	
 	public boolean isLinearDataPresent( ) {
@@ -49,7 +52,7 @@ public class IntegratedGridFile extends FileModel {
 	}
 	
 	public int getPointDataOffset( ) {
-		return getIntFrom( (short) 0, FileModel.L_END, 12 );
+		return getIntFrom( (short) 0, FileModel.B_END, 12 );
 	}
 	
 	public boolean isPointDataPresent( ) {
@@ -68,7 +71,7 @@ public class IntegratedGridFile extends FileModel {
 		return pointData;
 	}
 	
-	private class GridData {
+	public class GridData {
 		
 		private int o() {
 			return getGridDataOffset();
@@ -102,7 +105,7 @@ public class IntegratedGridFile extends FileModel {
 		}
 		
 		private void validSegment( int lineIndex, int partIndex, int segmentIndex ) throws IndexOutOfBounds, IOException {
-			if( segmentIndex < 0 || segmentIndex <= getPartSegmentCount( lineIndex, partIndex) )
+			if( segmentIndex < 0 || segmentIndex >= getPartSegmentCount( lineIndex, partIndex) )
 				throw new IndexOutOfBounds( "Segment "+segmentIndex+" is out bounds for line "+lineIndex+" part "+partIndex );
 		}
 		
@@ -139,7 +142,7 @@ public class IntegratedGridFile extends FileModel {
 		}
 		
 		public int getLineSize( int lineIndex ) throws IOException, IndexOutOfBounds {
-			return iv( lo( lineIndex )  );
+			return iv( lo( lineIndex ) );
 		}
 		
 		public int getPartCount( int lineIndex ) throws IOException, IndexOutOfBounds {
@@ -168,21 +171,21 @@ public class IntegratedGridFile extends FileModel {
 		}
 		
 		public float getPartStartLongitude( int lineIndex, int partIndex ) throws IOException, IndexOutOfBounds {
-			return fv( getPartOffset( lineIndex, partIndex ) );
+			return fv( lo( lineIndex ) + getPartOffset( lineIndex, partIndex ) );
 		}
 		
 		public int getPartPointCount( int lineIndex, int partIndex ) throws IOException, IndexOutOfBounds {
-			return iv( getPartOffset( lineIndex, partIndex ) + 4 );
+			return iv( lo( lineIndex ) + getPartOffset( lineIndex, partIndex ) + 4 );
 		}
 		
 		public int getPartSegmentCount( int lineIndex, int partIndex ) throws IOException, IndexOutOfBounds {
-			return iv( getPartOffset( lineIndex, partIndex ) + 8 );
+			return iv( lo( lineIndex ) + getPartOffset( lineIndex, partIndex ) + 8 );
 		}
 		
 		public short getSegmentIndex( int lineIndex, int partIndex, int segmentNum ) throws IndexOutOfBounds, IOException {
 			validSegment( lineIndex, partIndex, segmentNum );
 			int iLen = getIndexLength(),
-				sOff = getPartOffset( lineIndex, partIndex ) + 12 + segmentNum*(4+iLen);
+				sOff = 16 + lo( lineIndex ) + getPartOffset( lineIndex, partIndex ) + 12 + segmentNum*(4+iLen);
 			return iLen == 1 
 					? (short) getByteFrom( (short) 0, FileModel.B_END, sOff )
 					: sv( sOff ) ;
@@ -191,7 +194,7 @@ public class IntegratedGridFile extends FileModel {
 		public int getSegmentPointCount( int lineIndex, int partIndex, int segmentNum ) throws IndexOutOfBounds, IOException {
 			validSegment( lineIndex, partIndex, segmentNum );
 			int iLen = getIndexLength();
-			return iv( getPartOffset( lineIndex, partIndex ) + 12 + iLen + segmentNum*(iLen+4) );
+			return iv( lo(lineIndex) + getPartOffset( lineIndex, partIndex ) + 12 + iLen + segmentNum*(iLen+4) );
 		}
 	}
 	
@@ -277,5 +280,53 @@ public class IntegratedGridFile extends FileModel {
 	
 	public class PointData {
 		
+		public int o() {
+			return getPointDataOffset();
+		}
+		
+		private double dv( int offset ) throws IOException {
+			return getDoubleFrom( (short) 0, FileModel.B_END, o() + offset );
+		}
+		
+		private float fv( int offset ) {
+			return getFloatFrom( (short) 0, FileModel.B_END, o() + offset );
+		}
+		
+		private int iv( int offset ) {
+			return getIntFrom( (short) 0, FileModel.B_END, o() + offset );
+		}
+		
+		private short sv( int offset ) {
+			return getShortFrom( (short) 0, FileModel.B_END, o() + offset );
+		}
+		
+		public float getMinLat() throws IOException {
+			return fv( 0 );
+		}
+		
+		public float getMaxLat() throws IOException {
+			return fv( 8 );
+		}
+		
+		public float getMinLon() throws IOException {
+			return fv( 4 );
+		}		
+		
+		public float getMaxLon() throws IOException {
+			return fv( 12 );
+		}
+		
+		public int getPointCount() throws IOException {
+			return iv( 16 );
+		}
+		
+		public short getPointIndex( int recordOffsetIndex ) {
+			return sv( 20+10*recordOffsetIndex );
+		}
+		
+		public float [] getPoint( int recordOffsetIndex ) {
+			return new float[] { iv( 22 + 10*recordOffsetIndex ),
+								 iv( 26 + 10*recordOffsetIndex ) };
+		}
 	}
 }

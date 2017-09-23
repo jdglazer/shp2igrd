@@ -144,7 +144,7 @@ public class PolygonShapeFile extends ShapeFile {
  * 
  */
 	
-	public float [] getLatLon(int recordIndex, int partIndex, int pointIndex) throws RecordOutOfBoundsException, IOException {
+	public double [] getLatLon(int recordIndex, int partIndex, int pointIndex) throws RecordOutOfBoundsException, IOException {
 		
 		_vPointOffset(recordIndex, partIndex, pointIndex);
 		
@@ -152,11 +152,11 @@ public class PolygonShapeFile extends ShapeFile {
 		
 		recOff += pointIndex*16;
 		
-		return new float[]{
+		return new double[]{
 				
-				(float) getDoubleFrom( fileIndex(  SHP_EXTENSION ), L_END, recOff + 8 ),
+				getDoubleFrom( fileIndex(  SHP_EXTENSION ), L_END, recOff + 8 ),
 				
-				(float) getDoubleFrom( fileIndex(  SHP_EXTENSION ), L_END, recOff )
+				getDoubleFrom( fileIndex(  SHP_EXTENSION ), L_END, recOff )
 				
 				};
 		

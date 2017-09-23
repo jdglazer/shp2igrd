@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: shp2igrd
+Bundle-SymbolicName: shp2igrd
+Bundle-Version: 1.0.0.qualifier
+Export-Package: com.jdglazer.shp2igrd.generators,
+ com.jdglazer.shp2igrd.igrd,
+ com.jdglazer.shp2igrd.shp,
+ com.jdglazer.shp2igrd.utils

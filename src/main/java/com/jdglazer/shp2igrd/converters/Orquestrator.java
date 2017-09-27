@@ -28,6 +28,13 @@ public interface Orquestrator {
 	public void onWorkerFinished( ConversionWorkerTask finishedWorker );
 	
 	/**
+	 * This is called if the main conversion tasks failed. That is, if a 
+	 * conversion worker's execution function returns false.
+	 * @param failedWorker
+	 */
+	public void onWorkerFailed( ConversionWorkerTask failedWorker );
+	
+	/**
 	 * This is how the calling thread tells the Orquestrator which Workers are queued
 	 * periodically
 	 */

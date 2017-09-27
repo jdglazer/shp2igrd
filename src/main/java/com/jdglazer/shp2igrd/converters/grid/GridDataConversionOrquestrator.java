@@ -9,11 +9,25 @@ package com.jdglazer.shp2igrd.converters.grid;
 import java.util.ArrayList;
 
 import com.jdglazer.igrd.IGRDCommonDTO;
+import com.jdglazer.igrd.grid.GridDataHeaderDTO;
 import com.jdglazer.shp2igrd.ConversionProgressDTO;
 import com.jdglazer.shp2igrd.converters.ConversionWorkerTask;
 import com.jdglazer.shp2igrd.converters.Orquestrator;
 
 public class GridDataConversionOrquestrator implements Orquestrator {
+	
+	private GridDataHeaderDTO gridDataHeader = new GridDataHeaderDTO();
+	
+	// A 2-dimensional array list. This an array list of array lists of concurrently executable tasks
+	private ArrayList< ArrayList< ConversionWorkerTask > > taskQueue = new ArrayList< ArrayList< ConversionWorkerTask > >();
+	
+	// When this becomes empty we remove the next set of concurrent tasks from above and add them here
+	private ArrayList<ConversionWorkerTask> currentTaskQueue = new ArrayList<ConversionWorkerTask>();
+	
+	// an array list of conversion worker tasks that are still running. When we remove a task from the above 
+	//array list and pass it to the Converter to queue up, we add it here until the converter passes the task
+	// back as finished or failed. Then we remove it from here as a well
+	private ArrayList<ConversionWorkerTask> runningTasks = new ArrayList<ConversionWorkerTask>();
 
 	public byte [] fetchBinary(int chunkSize) {
 		// TODO Auto-generated method stub
@@ -21,7 +35,7 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 	}
 
 	public void addTaskToQueue(ConversionWorkerTask[] workerTask) {
-		// TODO Auto-generated method stub
+		workerTask[0] = new GridDataHeaderConversionStage1WorkerTask(null, gridDataHeader, .00018, .00018, 2);
 		
 	}
 
@@ -46,6 +60,11 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 	}
 
 	public void onWorkerFinished(ConversionWorkerTask finishedWorker) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onWorkerFailed(ConversionWorkerTask failedWorker) {
 		// TODO Auto-generated method stub
 		
 	}

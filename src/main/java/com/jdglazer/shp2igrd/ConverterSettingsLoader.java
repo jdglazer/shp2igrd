@@ -3,6 +3,10 @@
  */
 package com.jdglazer.shp2igrd;
 
-public class ConverterSettingsLoader {
+public abstract class ConverterSettingsLoader {
+	
+	public static synchronized String getTempFolderPath() {
+		return "/var/tmp";
+	}
 
 }

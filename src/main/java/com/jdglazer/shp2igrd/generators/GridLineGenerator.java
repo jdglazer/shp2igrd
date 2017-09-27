@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import com.jdglazer.igrd.grid.GridDataLineDTO;
+import com.jdglazer.igrd.utils.GridSegmentShortOverflowDTO;
 import com.jdglazer.shp2igrd.shp.InvalidFileTypeException;
 import com.jdglazer.shp2igrd.shp.PolygonShapeFile;
 import com.jdglazer.shp2igrd.shp.RecordOutOfBoundsException;
@@ -50,11 +51,15 @@ public class GridLineGenerator {
 			
 			if( longitude > intersection1.longitude && longitude <= intersection2.longitude ) {
 				intersectionCount = (int) ( (intersection2.longitude - longitude)/lonInterval + 1 );
+				GridSegmentShortOverflowDTO sodto = GridSegmentShortOverflowDTO.getOverflowDTO(intersectionCount, partDTO.getSegmentCount(), gridLineRecordDTO.getNumberParts());
 				longitude = ( (double) intersectionCount ) * lonInterval + longitude;
 				GridDataLineDTO.SegmentDTO segmentDTO = gridLineRecordDTO.new SegmentDTO();
 				segmentDTO.setSegmentIndex(intersection1.index);
 				segmentDTO.setSegmentLength((short)intersectionCount);
 				partDTO.addSegment(segmentDTO);
+				if( sodto != null ) {
+					gridLineRecordDTO.addShortOverflow(sodto);
+				}
 				
 			} else if( longitude > intersection2.longitude ) {
 				continue;

@@ -10,21 +10,29 @@ import com.jdglazer.shp2igrd.generators.GridLineGenerator;
 
 public class GridLineConversionWorkerTask implements ConversionWorkerTask {
 	
-	double lineInterval;
+	private ArrayList<GridDataLineDTO> gridDataLines = new ArrayList<GridDataLineDTO>();
 	
 	private GridLineGenerator gridLineGenerator;
 	
+	private double lineInterval;
+	
 	private int startIndex, endIndex;
 	
-	double startLatitude = gridLineGenerator.getPolygonShapeFile().getLatMin() + lineInterval/2.0,
-			   latitude;
-
+	double startLatitude, latitude;
+	
+	public GridLineConversionWorkerTask( int startIndex, int endIndex, double lineInterval ) {
+		this.startIndex = startIndex;
+		this.endIndex = endIndex;
+		this.lineInterval = lineInterval;
+		startLatitude = gridLineGenerator.getPolygonShapeFile().getLatMin() + lineInterval/2.0;	
+	}
+	
 	public int getIterationStartIndex() {
 		return startIndex;
 	}
 
 	public int getIterationEndIndex() {
-		return startIndex;
+		return endIndex;
 	}
 
 	public boolean executeConversionForIndex(int index, ArrayList<IGRDCommonDTO> arrayListToFill) {
@@ -32,6 +40,19 @@ public class GridLineConversionWorkerTask implements ConversionWorkerTask {
 		GridDataLineDTO ldr = gridLineGenerator.generateLine(latitude, lineInterval);
 		arrayListToFill.add( ldr );
 		return true;
+	}
+	
+	public GridDataLineDTO getGridDataLine(int index) {
+		if( validLineIndex( index ) ) {
+			return gridDataLines.get( index - startIndex );
+		} else {
+			//log error
+			return null;
+		}
+	}
+	
+	private boolean validLineIndex( int index ) {
+		return index >= startIndex && index <= endIndex && gridDataLines.size() > (index - startIndex );
 	}
 
 }

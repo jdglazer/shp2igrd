@@ -44,4 +44,8 @@ public class WorkerThread {
 	public ConversionWorkerTask getConversionWorkerTask() {
 		return task;
 	}
+	
+	public ConversionWorker getConversionWorker() {
+		return worker;
+	}
 }

@@ -14,6 +14,8 @@ public class ConversionWorker implements Runnable {
 	
 	private boolean pause;
 	
+	private boolean failed = false;
+	
 	private boolean stopped = true;
 	
 	private boolean flushing = false;
@@ -49,7 +51,7 @@ public class ConversionWorker implements Runnable {
 		}
 		
 		for( ; progress <= endLine; progress++ ) {
-			conversionWorkerTask.executeConversionForIndex( progress, lineRecords );
+			failed = !conversionWorkerTask.executeConversionForIndex( progress, lineRecords );
 			if( pause && progress != endLine ) {
 				progress++;
 				stopped = true;
@@ -74,6 +76,10 @@ public class ConversionWorker implements Runnable {
 	
 	public boolean finished() {
 		return progress == endLine && endLine == ( flushPoint + lineRecords.size() );
+	}
+	
+	public boolean failed() {
+		return failed;
 	}
 	
 	public boolean stopped() {

@@ -4,7 +4,10 @@ import java.util.ArrayList;
 
 import com.jdglazer.shp2igrd.converters.ConversionWorker.WorkerType;
 import com.jdglazer.shp2igrd.converters.ConversionWorkerTask;
+import com.jdglazer.shp2igrd.converters.Orquestrator;
 import com.jdglazer.shp2igrd.converters.grid.GridDataConversionOrquestrator;
+import com.jdglazer.shp2igrd.converters.line.LinearDataConversionOrquestrator;
+import com.jdglazer.shp2igrd.converters.point.PointDataConversionOrquestrator;
 
 public class Converter {
 	//Thread execution management and settings
@@ -25,10 +28,13 @@ public class Converter {
 	
 	//The Orquestrators for each of the data type conversions ( grid, line, point, igrd parent )
 	private GridDataConversionOrquestrator gridOrquestrator = new GridDataConversionOrquestrator();
+	private LinearDataConversionOrquestrator lineOrquestrator = new LinearDataConversionOrquestrator();
+	private PointDataConversionOrquestrator pointOrquestrator = new PointDataConversionOrquestrator();
 	
 	public Converter() {
 	}
 	
+	// main executions code
 	public void run() {
 		long startTime, remainingInterval;
 		while(!stop) {
@@ -76,6 +82,8 @@ public class Converter {
 		// TODO: starts and stops threads based on the thread limits
 		//       and current run states of threads
 		//**********************************************************
+		
+		//Finds finished worker threads
 		ArrayList<WorkerThread> finished = new ArrayList<WorkerThread>();
 		for( WorkerThread workerThread : conversionWorkers ) {
 			if( workerThread.isFinished() ) {
@@ -83,36 +91,57 @@ public class Converter {
 			}
 		}
 		
+		// Sifts through finished worker threads to determine which orquestrator
+		// they belong to. Then executes orquestrator callback functions based
+		// on success or failure of worker task
 		for( WorkerThread workerThread : finished ) {
 			conversionWorkers.remove(workerThread);
+			Orquestrator orquestrator = null;
 			switch( workerThread.type ) {
 			case GRID:
-				gridOrquestrator.onWorkerFinished( workerThread.getConversionWorkerTask() );
+				orquestrator = gridOrquestrator;
 			case LINE:
-				// TODO: add line orquestrator
+				orquestrator = lineOrquestrator;
 			case POINT:
-				// TODO: add point orquestrator
+				orquestrator = pointOrquestrator;
+			}
+			if( orquestrator != null ) {
+				ConversionWorkerTask cwt = workerThread.getConversionWorkerTask();
+				if( workerThread.getConversionWorker().failed() ) {
+					orquestrator.onWorkerFailed(cwt);
+				} else {
+					orquestrator.onWorkerFinished(cwt);
+				}
 			}
 		}
 		
+		// Fill the remaining available threads with tasks in a round robin
+		// fashion from the line grid and  point conversion worker queues
 		int availableWorkerSlots = workerCount - conversionWorkers.size();
 		
 		if( availableWorkerSlots > 0 && totalQueuedWorkerTasks() > 0) {
 			int workersAdded=0;
 			while( workersAdded < availableWorkerSlots ) {
+				ArrayList<ConversionWorkerTask> cwt = null;
+				WorkerType wt = null;
 				switch(queueIterator) {
 				case 0:
-					startThreadFromQueue( gridConversionWorkersQueue, WorkerType.GRID );
-					workersAdded++;
+					cwt = gridConversionWorkersQueue;
+					wt = WorkerType.GRID;
 					break;
 				case 1:
-					startThreadFromQueue( lineConversionWorkersQueue, WorkerType.LINE );
-					workersAdded++;
+					cwt = lineConversionWorkersQueue;
+					wt = WorkerType.LINE;
 					break;
 				case 2:
-					startThreadFromQueue( pointConversionWorkersQueue, WorkerType.POINT );
-					workersAdded++;
+					cwt = pointConversionWorkersQueue;
+					wt = WorkerType.POINT;
 					break;
+				}
+				
+				if( cwt != null ) {
+					startThreadFromQueue( cwt, wt );
+					workersAdded++;
 				}
 				
 				queueIterator = queueIterator == 2 ? 0 : queueIterator+1;

@@ -9,7 +9,6 @@
 
   <name>shp2igrd</name>
   <url>http://maven.apache.org</url>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -25,6 +24,11 @@
 	    <groupId>com.jdglazer</groupId>
 	    <artifactId>igrd-utils</artifactId>
 	    <version>0.0.1-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+    	<groupId>org.jamel.dbf</groupId>
+    	<artifactId>dbf-reader</artifactId>
+   		<version>0.0.3</version>
 	</dependency>
   </dependencies>
 </project>

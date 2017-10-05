@@ -8,7 +8,11 @@ package com.jdglazer.shp2igrd;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
+
 public class ConversionProgressDTO {
+	
+	private Logger logger = Logger.getLogger(ConversionProgressDTO.class);
 	
 	private HashMap<String,ConversionTaskDTO> conversionTasks;
 	
@@ -17,7 +21,7 @@ public class ConversionProgressDTO {
 		if( ctdto != null ) {
 			return ( (double)ctdto.taskWeight/(double)getTotalWeight() )*ctdto.progress;
 		}
-		// log warning conversion task DNE
+		logger.warn( "Conversion task - "+name+" - does not exist");
 		return 0.0;
 	}
 	

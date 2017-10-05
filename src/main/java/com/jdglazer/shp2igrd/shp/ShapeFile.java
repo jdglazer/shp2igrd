@@ -141,7 +141,7 @@ public class ShapeFile extends FileModel {
 	}
 	
 /**
- * Takes the address and name of the shapefile (without any extension) and assumes associated 
+ * Takes the address and name of the shapefile  and assumes associated 
  * database and index files have the same name in keeping with convention set forth in ESRI shapefile specifications
  * 
  * @param name
@@ -153,8 +153,7 @@ public class ShapeFile extends FileModel {
  */
 	
 	public ShapeFile(String name) throws InvalidFileTypeException, FileNotFoundException, IOException, RecordOutOfBoundsException {
-		
-		this(name.trim()+".shp", name.trim()+".shx", name.trim()+".dbf");
+		this(name.trim(), name.trim().substring( 0, name.length() - 4 )+".shx", name.trim().substring( 0, name.length() - 4 )+".dbf");
 	}
 
 /**

@@ -51,11 +51,16 @@ public class GridDataHeaderConversionStage1WorkerTask implements ConversionWorke
 		gridDataHeader.setLatitudeInterval(latInterval);
 		gridDataHeader.setLongitudeInterval(lonInterval);
 		
-		int latitudeLineCount = (int) ( polygonSF.getLatMax() - polygonSF.getLatMin() + latInterval/2.0 ) + 1;
-		gridDataHeader.setLatitudeLineCount(latitudeLineCount);
+
+		gridDataHeader.setLatitudeLineCount(getLineCount(polygonSF, latInterval) );
 		
 		gridDataHeader.setIndexIdentifierType( (short) indexIdentifier );
 		return true;
+	}
+	
+	public static int getLineCount( PolygonShapeFile polygonShapeFile, double latInterval ) {
+		return (int) ( polygonShapeFile.getLatMax() - polygonShapeFile.getLatMin() + latInterval/2.0 ) + 1;
+	
 	}
 
 }

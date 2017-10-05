@@ -35,10 +35,9 @@ public interface Orquestrator {
 	public void onWorkerFailed( ConversionWorkerTask failedWorker );
 	
 	/**
-	 * This is how the calling thread tells the Orquestrator which Workers are queued
-	 * periodically
+	 * This is how we get the unique name for an orquestrator
 	 */
-	public void updateQueuedWorkers( ConversionWorkerTask [] queuedWorkers );
+	public String getOrquestratorType();
 	
 	/**
 	 * This function should be called once to inject the conversion progress bus into 
@@ -60,5 +59,11 @@ public interface Orquestrator {
 	 * file
 	 */
 	public boolean done();
+	
+	/**
+	 * This tells us whether the conversion process has been successful so far. This is how the
+	 * main thread manager determined whether to continue queueing up and running threads
+	 */
+	public boolean success();
 	
 }

@@ -11,7 +11,7 @@ public class PolygonShapeFileTest extends TestCase {
 	public void setUp() {
 		try {
 			String PSFPath = getClass().getResource("/PAgeol_dd/pageol_poly_dd.shp").getPath();
-			psf = new PolygonShapeFile( new ShapeFile( PSFPath.substring(0, PSFPath.length() - 4 ) ) );
+			psf = new PolygonShapeFile( new ShapeFile( PSFPath ) );
 			
 		} catch (Exception e) {
 			fail("Failed instantiating PolygonShapeFile. Error msg: "+e.getMessage() );

@@ -5,12 +5,14 @@ import junit.framework.TestCase;
 
 public class PolylineShapeFileTest extends TestCase {
 	
+	private final String POLYLINE_SHAPE_FILE = getClass().getResource("/PAgeol_dd/pageol_arc_dd.shp").getPath();
+	
 	private PolylineShapeFile psf;
 	
 	@Override
 	public void setUp() {
 		try {
-			psf = new PolylineShapeFile( new ShapeFile( "/home/jglazer/Downloads/PAgeol_dd/pageol_arc_dd" ) );
+			psf = new PolylineShapeFile( new ShapeFile( POLYLINE_SHAPE_FILE ) );
 		} catch (Exception e) {
 			fail( "Unable to instatiate PolylineShapeFile. Error: "+e.getMessage() );
 		}

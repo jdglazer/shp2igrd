@@ -12,7 +12,7 @@ public class ShapeFileTest extends TestCase {
 	
 	private ShapeFile shpConstr1, shpConstr2, shpConstr3;
 	
-	private final String shapeFilePath = "/home/jglazer/Downloads/PAgeol_dd/pageol_poly_dd";
+	private final String SHAPE_FILE_PATH = getClass().getResource( "/PAgeol_dd/pageol_poly_dd.shp" ).getPath();
 	private final int version = 1000;
 	private final int shapeType = 5;
 	private final double minLat = 39.71955;
@@ -30,8 +30,9 @@ public class ShapeFileTest extends TestCase {
 	}
 	
 	private void initiateShapeObjects() {
+		String shapeFilePath = SHAPE_FILE_PATH.trim().substring( 0, SHAPE_FILE_PATH.length() - 4 );
 		try {
-			shpConstr1 = new ShapeFile(shapeFilePath);
+			shpConstr1 = new ShapeFile(shapeFilePath+".shp");
 			shpConstr2 = new ShapeFile(shapeFilePath+".shp",shapeFilePath+".shx",shapeFilePath+".dbf");
 			shpConstr3 = new ShapeFile( shpConstr2 );
 		} catch (Exception e) {

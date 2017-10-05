@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import com.jdglazer.igrd.IGRDCommonDTO;
 import com.jdglazer.igrd.grid.GridDataLineDTO;
-import com.jdglazer.igrd.line.LineDataRecordDTO;
 import com.jdglazer.shp2igrd.converters.ConversionWorkerTask;
 import com.jdglazer.shp2igrd.generators.GridLineGenerator;
+import com.jdglazer.shp2igrd.shp.PolygonShapeFile;
 
 public class GridLineConversionWorkerTask implements ConversionWorkerTask {
 	
@@ -14,17 +14,19 @@ public class GridLineConversionWorkerTask implements ConversionWorkerTask {
 	
 	private GridLineGenerator gridLineGenerator;
 	
-	private double lineInterval;
+	private double lonInterval, latInterval;
 	
 	private int startIndex, endIndex;
 	
 	double startLatitude, latitude;
 	
-	public GridLineConversionWorkerTask( int startIndex, int endIndex, double lineInterval ) {
+	public GridLineConversionWorkerTask( PolygonShapeFile psf, int startIndex, int endIndex, double lonInterval, double latInterval ) {
 		this.startIndex = startIndex;
 		this.endIndex = endIndex;
-		this.lineInterval = lineInterval;
-		startLatitude = gridLineGenerator.getPolygonShapeFile().getLatMin() + lineInterval/2.0;	
+		this.lonInterval = lonInterval;
+		this.latInterval = latInterval;
+		this.gridLineGenerator = new GridLineGenerator(psf);
+		startLatitude = gridLineGenerator.getPolygonShapeFile().getLatMin() + latInterval/2.0;	
 	}
 	
 	public int getIterationStartIndex() {
@@ -36,8 +38,8 @@ public class GridLineConversionWorkerTask implements ConversionWorkerTask {
 	}
 
 	public boolean executeConversionForIndex(int index, ArrayList<IGRDCommonDTO> arrayListToFill) {
-		latitude = startLatitude + ((double)index)*lineInterval;
-		GridDataLineDTO ldr = gridLineGenerator.generateLine(latitude, lineInterval);
+		latitude = startLatitude + ((double)index)*latInterval;
+		GridDataLineDTO ldr = gridLineGenerator.generateLine(latitude, lonInterval);
 		arrayListToFill.add( ldr );
 		return true;
 	}

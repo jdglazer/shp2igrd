@@ -8,5 +8,9 @@ public abstract class ConverterSettingsLoader {
 	public static synchronized String getTempFolderPath() {
 		return "/var/tmp";
 	}
+	
+	public static synchronized int getWorkerThreadCount() {
+		return 1;
+	}
 
 }

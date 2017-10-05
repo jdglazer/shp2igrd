@@ -2,9 +2,13 @@ package com.jdglazer.shp2igrd.converters;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 import com.jdglazer.igrd.IGRDCommonDTO;
 
 public class ConversionWorker implements Runnable {
+	
+	private Logger logger = Logger.getLogger(ConversionWorker.class);
 	
 	private int startLine, endLine;
 	
@@ -40,19 +44,21 @@ public class ConversionWorker implements Runnable {
 		this.endLine = cwt.getIterationEndIndex();
 	}
 	
-	public synchronized boolean getLines() {
+	public synchronized boolean execute() {
 		
 		stopped = false;
 		pause = false;
 		
 		if( finished() ) {
-			progress = 0;
+			progress = startLine;
 			lineRecords = new ArrayList<IGRDCommonDTO>();
 		}
 		
 		for( ; progress <= endLine; progress++ ) {
+			logger.debug("Executing worker tasks for iteration "+progress);
 			failed = !conversionWorkerTask.executeConversionForIndex( progress, lineRecords );
 			if( pause && progress != endLine ) {
+				logger.info("Paused worker at task iteration "+progress);
 				progress++;
 				stopped = true;
 				break;
@@ -87,6 +93,7 @@ public class ConversionWorker implements Runnable {
 	}
 	
 	public ArrayList<IGRDCommonDTO> flush() {
+		logger.info("Flushing worker");
 		flushing = true;
 		while( !flushBlocked ) {
 			try {
@@ -98,12 +105,14 @@ public class ConversionWorker implements Runnable {
 			flush.add( lineRecords.get(i) );
 		}
 		flushPoint += lineRecords.size();
+		logger.info("Flushed "+lineRecords.size()+" IGRDCommonDTO objects from worker");
 		lineRecords.clear();
 		flushing = false;
 		return flush;
 	}
 	
 	private void flushBlock() {
+		logger.debug("Flush blocking worker task execution");
 		while( flushing ) {
 			flushBlocked = true;
 			try {
@@ -115,7 +124,7 @@ public class ConversionWorker implements Runnable {
 	}
 
 	public void run() {
-		getLines();
+		execute();
 	}
 	
 }

@@ -29,11 +29,6 @@ public class PointDataConversionOrquestrator implements Orquestrator {
 
 	}
 
-	public void updateQueuedWorkers(ConversionWorkerTask[] queuedWorkers) {
-		// TODO Auto-generated method stub
-
-	}
-
 	public void updateConversionProgressBus(ConversionProgressDTO conversionProgressDTO) {
 		// TODO Auto-generated method stub
 
@@ -45,6 +40,16 @@ public class PointDataConversionOrquestrator implements Orquestrator {
 	}
 
 	public boolean done() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public String getOrquestratorType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public boolean success() {
 		// TODO Auto-generated method stub
 		return false;
 	}

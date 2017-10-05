@@ -8,6 +8,7 @@
 package com.jdglazer.shp2igrd.dbf;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -19,6 +20,7 @@ public class DbfNormalizer {
 	private DbfReader dbfReader;
 	private boolean normalized = false;
 	private HashMap<Integer,Integer> normalizedList = new HashMap<Integer,Integer>();
+	private HashMap<Integer,ArrayList<String>> indexValues = new HashMap<Integer, ArrayList<String>>();
 	
 	public DbfNormalizer( File dbfFile, int... columnsToNormalizeOn ) throws Exception {
 		dbfReader = new DbfReader( dbfFile );
@@ -37,17 +39,20 @@ public class DbfNormalizer {
 			// log message already normalized
 			return;
 		}
-		HashMap<String, Integer> uniqueDbfRecords = new HashMap<String,Integer>();
+		HashMap<ArrayList<String>, Integer> uniqueDbfRecords = new HashMap<ArrayList<String>,Integer>();
 		Object [] record;
 		int shapeIndex = 0;
 		while( ( record = dbfReader.nextRecord() ) != null ) {
-			String combinedString = "";
+			ArrayList<String> combined = new ArrayList<String>();
 			for( int i : columnsToNormalizeOn ) {
-				combinedString += convertToString( record[i] ).trim();
+				combined.add( convertToString( record[i] ).trim() );
 			}
-			Integer currentValue = uniqueDbfRecords.putIfAbsent(combinedString, uniqueDbfRecords.size() );
+			Integer currentValue = uniqueDbfRecords.putIfAbsent(combined, uniqueDbfRecords.size() );
 			normalizedList.put(shapeIndex, currentValue != null ? currentValue : uniqueDbfRecords.size()-1);
 			shapeIndex++;
+		}
+		for( ArrayList<String> list : uniqueDbfRecords.keySet() ) {
+			indexValues.put(uniqueDbfRecords.get(list), list);
 		}
 		normalized = true;
 	}
@@ -74,6 +79,10 @@ public class DbfNormalizer {
 	
 	public int getIndexForShapeFileRecord( int recordIndex ) {
 		return normalizedList.get(recordIndex);
+	}
+	
+	public String getDbfValueWithIndex( int normalizedIndex, int rowIndex ) {
+		return indexValues.get(normalizedIndex).get(rowIndex);
 	}
 	
 }

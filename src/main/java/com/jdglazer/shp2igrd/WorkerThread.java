@@ -1,12 +1,14 @@
 package com.jdglazer.shp2igrd;
 
-import com.jdglazer.shp2igrd.converters.ConversionWorker.WorkerType;
+import org.apache.log4j.Logger;
+
 import com.jdglazer.shp2igrd.converters.ConversionWorker;
 import com.jdglazer.shp2igrd.converters.ConversionWorkerTask;
 
 public class WorkerThread {
+	private Logger logger = Logger.getLogger(WorkerThread.class);
 	//Tells us the type of worker
-	public WorkerType type;
+	private final String parentOrquestratorType;
 	// A specific task to be executed by a generic worker
 	private ConversionWorkerTask task;
 	// A generic runnable worker to execute task and store and flush data from task
@@ -14,9 +16,10 @@ public class WorkerThread {
 	//A thread to run the task
 	private Thread thread;
 	
-	public WorkerThread( ConversionWorkerTask task, WorkerType type ) {
+	public WorkerThread( ConversionWorkerTask task, String parentOrquestratorType ) {
+		logger.debug( "Creating new worker thread" );
 		worker = new ConversionWorker( task );
-		this.type = type;
+		this.parentOrquestratorType = parentOrquestratorType;
 		thread = new Thread( worker );
 	}
 	
@@ -47,5 +50,9 @@ public class WorkerThread {
 	
 	public ConversionWorker getConversionWorker() {
 		return worker;
+	}
+	
+	public String getParentOrquestratorType() {
+		return parentOrquestratorType;
 	}
 }

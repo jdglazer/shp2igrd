@@ -34,7 +34,7 @@ public class PointDataConversionOrquestrator implements Orquestrator {
 
 	}
 
-	public void onFlush(ArrayList<IGRDCommonDTO> flushedObjects) {
+	public void onFlush(ArrayList<IGRDCommonDTO> flushedObjects, Class taskType, int startIndex, int endIndex) {
 		// TODO Auto-generated method stub
 
 	}

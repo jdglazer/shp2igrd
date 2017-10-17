@@ -50,8 +50,11 @@ public interface Orquestrator {
 	 * This function passes the objects that have been flushed from a worker ( due to memory
 	 * limits being reached ) to the Orquestrator to stash the information where it sees
 	 * fit.
+	 * @param taskType TODO
+	 * @param startIndex TODO
+	 * @param endIndex TODO
 	 */
-	public void onFlush( ArrayList<IGRDCommonDTO> flushedObjects );
+	public void onFlush( ArrayList<IGRDCommonDTO> flushedObjects, Class taskType, int startIndex, int endIndex );
 	
 	/**
 	 * A function called to periodically give the orquestrator a chance to tell the calling thread

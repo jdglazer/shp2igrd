@@ -92,23 +92,23 @@ public class ConversionWorker implements Runnable {
 		return stopped;
 	}
 	
-	public ArrayList<IGRDCommonDTO> flush() {
+	public int [] flush( ArrayList<IGRDCommonDTO> listToFill ) {
 		logger.info("Flushing worker");
 		flushing = true;
+		int startFlushPoint = flushPoint + 1;
 		while( !flushBlocked ) {
 			try {
 				Thread.sleep( 25 );
 			} catch (InterruptedException e) {}
 		}
-		ArrayList<IGRDCommonDTO> flush = new ArrayList<IGRDCommonDTO>();
 		for( int i = 0; i < lineRecords.size(); i++ ) {
-			flush.add( lineRecords.get(i) );
+			listToFill.add( lineRecords.get(i) );
 		}
 		flushPoint += lineRecords.size();
 		logger.info("Flushed "+lineRecords.size()+" IGRDCommonDTO objects from worker");
 		lineRecords.clear();
 		flushing = false;
-		return flush;
+		return new int[]{ startFlushPoint, flushPoint };
 	}
 	
 	private void flushBlock() {

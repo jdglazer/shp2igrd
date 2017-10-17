@@ -5,12 +5,20 @@ package com.jdglazer.shp2igrd;
 
 public abstract class ConverterSettingsLoader {
 	
+	private static int workerThreadCount  = 1;
+	
+	private static String tempFolderPath  = "/var/tmp";
+	
 	public static synchronized String getTempFolderPath() {
-		return "/var/tmp";
+		return tempFolderPath;
 	}
 	
 	public static synchronized int getWorkerThreadCount() {
-		return 1;
+		return workerThreadCount;
+	}
+	
+	public static synchronized void setWorkerThreadCount( int workerThreadCount ) {
+		ConverterSettingsLoader.workerThreadCount = workerThreadCount;
 	}
 
 }

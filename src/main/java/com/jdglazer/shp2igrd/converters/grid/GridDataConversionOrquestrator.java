@@ -20,6 +20,7 @@ import com.jdglazer.shp2igrd.ConverterSettingsLoader;
 import com.jdglazer.shp2igrd.converters.ConversionWorkerTask;
 import com.jdglazer.shp2igrd.converters.Orquestrator;
 import com.jdglazer.shp2igrd.dbf.DbfNormalizer;
+import com.jdglazer.shp2igrd.generators.SerializedGridDataFileGenerator;
 import com.jdglazer.shp2igrd.shp.PolygonShapeFile;
 import com.jdglazer.shp2igrd.shp.ShapeFile;
 
@@ -36,6 +37,8 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 	private PolygonShapeFile polygonShapeFile;
 	
 	private DbfNormalizer dbfNormalizer;
+	
+	private ArrayList<String> serializedDataFiles = new ArrayList<String>();
 	
 	// A 2-dimensional array list. This an array list of array lists of concurrently executable tasks
 	private ArrayList< ArrayList< ConversionWorkerTask > > taskQueue = new ArrayList< ArrayList< ConversionWorkerTask > >();
@@ -78,13 +81,13 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 		    latitudeLineCount = GridDataHeaderConversionStage1WorkerTask.getLineCount(polygonShapeFile, latInterval);
 		ArrayList<ConversionWorkerTask> lineConverters = new ArrayList<ConversionWorkerTask>();
 		if( gridLineThreadCount > latitudeLineCount ) {
-			gridLineThreadCount = 1;
+			gridLineThreadCount = latitudeLineCount;
 		}
 		int linesPerThread = latitudeLineCount/gridLineThreadCount,
 			startIndex = 0;
 		for( int j = 1; j <= gridLineThreadCount ; j++ ) {
 			int endIndex = gridLineThreadCount == j ? latitudeLineCount - 1: startIndex + linesPerThread - 1;
-			lineConverters.add( new GridLineConversionWorkerTask(polygonShapeFile,startIndex,endIndex,latInterval,lonInterval) );
+			lineConverters.add( new GridLineConversionWorkerTask(polygonShapeFile,startIndex,endIndex,lonInterval,latInterval) );
 			startIndex = endIndex + 1;
 		}
 		taskQueue.add(lineConverters);
@@ -135,9 +138,18 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 		
 	}
 
-	public void onFlush(ArrayList<IGRDCommonDTO> flushedObjects) {
+	public void onFlush(ArrayList<IGRDCommonDTO> flushedObjects, Class flushedTaskClass, int startIndex, int endIndex) {
 		// TODO Auto-generated method stub
+		logger.info("Writing data for executor indices: "+startIndex+" to "+endIndex+", for task type: "+flushedTaskClass.getCanonicalName() );
+		String fileName = SerializedGridDataFileGenerator.writeToFile(startIndex, endIndex, flushedTaskClass.getCanonicalName(), flushedObjects);
 		
+		if ( fileName != null ) {
+			logger.info( "Successfully wrote data to temporary file: "+fileName );
+			serializedDataFiles.add(fileName);
+		} else {
+			logger.error( "Failed to serialize flushed data for "+flushedTaskClass.getCanonicalName()+", indices "+startIndex+" to "+endIndex);
+			SUCCESS_FLAG = false;
+		}
 	}
 
 	public boolean done() {
@@ -170,4 +182,7 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 		return ORQUESTRATOR_TYPE;
 	}
 
+	public ArrayList< ArrayList< ConversionWorkerTask > > getTaskQueue() {
+		return taskQueue;
+	}
 }

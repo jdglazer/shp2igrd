@@ -12,7 +12,7 @@ public class ConversionWorker implements Runnable {
 	
 	private int startLine, endLine;
 	
-	private ArrayList<IGRDCommonDTO> lineRecords = new ArrayList<IGRDCommonDTO>();
+	private ArrayList<IGRDCommonDTO> records = new ArrayList<IGRDCommonDTO>();
 	
 	private int progress;
 	
@@ -51,12 +51,12 @@ public class ConversionWorker implements Runnable {
 		
 		if( finished() ) {
 			progress = startLine;
-			lineRecords = new ArrayList<IGRDCommonDTO>();
+			records = new ArrayList<IGRDCommonDTO>();
 		}
 		
 		for( ; progress <= endLine; progress++ ) {
 			logger.debug("Executing worker tasks for iteration "+progress);
-			failed = !conversionWorkerTask.executeConversionForIndex( progress, lineRecords );
+			failed = !conversionWorkerTask.executeConversionForIndex( progress, records );
 			if( pause && progress != endLine ) {
 				logger.info("Paused worker at task iteration "+progress);
 				progress++;
@@ -73,7 +73,7 @@ public class ConversionWorker implements Runnable {
 	}
 	
 	public ArrayList<IGRDCommonDTO> getAllRecords() {
-		return lineRecords;
+		return records;
 	}
 	
 	public void pause() {
@@ -81,7 +81,7 @@ public class ConversionWorker implements Runnable {
 	}
 	
 	public boolean finished() {
-		return progress == endLine && endLine == ( flushPoint + lineRecords.size() );
+		return progress == endLine && endLine == ( flushPoint + records.size() );
 	}
 	
 	public boolean failed() {
@@ -101,12 +101,12 @@ public class ConversionWorker implements Runnable {
 				Thread.sleep( 25 );
 			} catch (InterruptedException e) {}
 		}
-		for( int i = 0; i < lineRecords.size(); i++ ) {
-			listToFill.add( lineRecords.get(i) );
+		for( int i = 0; i < records.size(); i++ ) {
+			listToFill.add( records.get(i) );
 		}
-		flushPoint += lineRecords.size();
-		logger.info("Flushed "+lineRecords.size()+" IGRDCommonDTO objects from worker");
-		lineRecords.clear();
+		flushPoint += records.size();
+		logger.info("Flushed "+records.size()+" IGRDCommonDTO objects from worker");
+		records.clear();
 		flushing = false;
 		return new int[]{ startFlushPoint, flushPoint };
 	}

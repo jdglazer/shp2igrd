@@ -174,6 +174,8 @@ public class ConversionThreadManager {
 			Orquestrator orquestrator = orquestrators.get(workerThread.getParentOrquestratorType());
 			if( orquestrator != null ) {
 				ConversionWorkerTask cwt = workerThread.getConversionWorkerTask();
+				//We need to move the output of the conversion process from the worker to the task executor
+				cwt.addFinalConversionOutput(workerThread.getConversionWorker().getAllRecords());
 				if( workerThread.getConversionWorker().failed() ) {
 					logger.warn("Detected a failed conversion worker task - type: "+workerThread.getParentOrquestratorType() );
 					orquestrator.onWorkerFailed(cwt);

@@ -22,4 +22,9 @@ public class GridDataConversionWorkerTask implements ConversionWorkerTask {
 		return false;
 	}
 
+	public void addFinalConversionOutput(ArrayList<IGRDCommonDTO> dtoList) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -63,4 +63,9 @@ public class GridDataHeaderConversionStage1WorkerTask implements ConversionWorke
 	
 	}
 
+	public void addFinalConversionOutput(ArrayList<IGRDCommonDTO> dtoList) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -20,5 +20,8 @@ public abstract class ConverterSettingsLoader {
 	public static synchronized void setWorkerThreadCount( int workerThreadCount ) {
 		ConverterSettingsLoader.workerThreadCount = workerThreadCount;
 	}
-
+	
+	public static synchronized void setTempFolderPath( String path ) {
+		tempFolderPath = path;
+	}
 }

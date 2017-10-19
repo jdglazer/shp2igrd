@@ -57,4 +57,15 @@ public class GridLineConversionWorkerTask implements ConversionWorkerTask {
 		return index >= startIndex && index <= endIndex && gridDataLines.size() > (index - startIndex );
 	}
 
+	public void addFinalConversionOutput( ArrayList<IGRDCommonDTO> dtoList) {
+ 		for( IGRDCommonDTO icdto : dtoList ) {
+ 			if( icdto instanceof GridDataLineDTO ) {
+ 				gridDataLines.add( (GridDataLineDTO) icdto );
+ 			} else {
+ 				
+ 			}
+ 		}
+		
+	}
+
 }

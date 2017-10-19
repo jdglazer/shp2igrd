@@ -5,6 +5,11 @@
  */
 package com.jdglazer.shp2igrd;
 
-public class Converter {
+import com.jdglazer.shp2igrd.converters.grid.GridDataConversionOrquestrator;
 
+public class Converter {
+	public static void main( String [] args ) {
+		//GridDataConversionOrquestrator go = new GridDataConversionOrquestrator();
+		//ConversionThreadManager ctm = new ConversionThreadManager();
+	}
 }

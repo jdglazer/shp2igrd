@@ -141,7 +141,7 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 	public void onFlush(ArrayList<IGRDCommonDTO> flushedObjects, Class flushedTaskClass, int startIndex, int endIndex) {
 		// TODO Auto-generated method stub
 		logger.info("Writing data for executor indices: "+startIndex+" to "+endIndex+", for task type: "+flushedTaskClass.getCanonicalName() );
-		String fileName = SerializedGridDataFileGenerator.writeToFile(startIndex, endIndex, flushedTaskClass.getCanonicalName(), flushedObjects);
+		String fileName = SerializedGridDataFileGenerator.writeToFile(startIndex, endIndex, flushedTaskClass.getSimpleName(), flushedObjects);
 		
 		if ( fileName != null ) {
 			logger.info( "Successfully wrote data to temporary file: "+fileName );

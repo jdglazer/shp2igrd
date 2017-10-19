@@ -2,6 +2,7 @@ package com.jdglazer.shp2igrd.converters.grid;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,8 +10,11 @@ import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jdglazer.igrd.IGRDCommonDTO;
+import com.jdglazer.igrd.grid.GridDataLineDTO;
 import com.jdglazer.shp2igrd.ConverterSettingsLoader;
 import com.jdglazer.shp2igrd.converters.ConversionWorkerTask;
+import com.jdglazer.shp2igrd.generators.SerializedGridDataFileGenerator;
 import com.jdglazer.shp2igrd.shp.InvalidFileTypeException;
 import com.jdglazer.shp2igrd.shp.PolygonShapeFile;
 import com.jdglazer.shp2igrd.shp.RecordOutOfBoundsException;
@@ -31,6 +35,7 @@ public class GridDataConversionOrquestratorTest {
 	@Before
 	public void setUp() throws IOException {
 		ConverterSettingsLoader.setWorkerThreadCount(3);
+		ConverterSettingsLoader.setTempFolderPath("/home/jglazer/Documents");
 		orquestrator = new GridDataConversionOrquestrator( 
 				   POLYGON_SHAPE_FILE, 
 				   DBF_FILE, 
@@ -58,6 +63,34 @@ public class GridDataConversionOrquestratorTest {
 		}
 		int lineCount = GridDataHeaderConversionStage1WorkerTask.getLineCount(new PolygonShapeFile( new ShapeFile( POLYGON_SHAPE_FILE ) ), LATITUDE_INTERVAL);
 		assertEquals("Grid line workers indices don't end at last grid line.", lineCount-1, cwt_list.get( cwt_list.size() - 1 ).getIterationEndIndex() );
+	}
+	
+	@Test
+	public void verifyGridFlush() throws InterruptedException {
+		
+		ArrayList<IGRDCommonDTO> dtos = new ArrayList<IGRDCommonDTO>();
+		dtos.add(new GridDataLineDTO((short)1));
+		dtos.add(new GridDataLineDTO((short)1));
+		// Stall the tests long enough to ensure no other preceding tests interfere
+		Thread.sleep(500);
+		// run flush
+		orquestrator.onFlush(dtos, GridDataLineDTO.class, 0, 1);
+		long currentTime = System.currentTimeMillis();
+		File file = new File( ConverterSettingsLoader.getTempFolderPath() );
+		int matches = 0;
+		
+		// count the number of serialized files written in the last 1 second
+		for( String f : file.list() ) {
+			long timeDelta =  currentTime - SerializedGridDataFileGenerator.parseTime(f);
+			if( timeDelta < 1000 && 0 < timeDelta  ) {
+				matches++;
+			}
+		}
+		//check that only one file was written
+		assertEquals( "Ensure that we wrote one file from flush",  1, matches);
+		
+		// Stall to make sure other tests don't get messed up due to file written by this test
+		Thread.sleep(500);
 	}
 
 }

@@ -14,6 +14,8 @@ import com.jdglazer.igrd.IGRDCommonDTO;
 import com.jdglazer.igrd.grid.GridDataLineDTO;
 import com.jdglazer.shp2igrd.ConverterSettingsLoader;
 import com.jdglazer.shp2igrd.converters.ConversionWorkerTask;
+import com.jdglazer.shp2igrd.converters.index.GenericIndexProvider;
+import com.jdglazer.shp2igrd.converters.index.IndexProvider;
 import com.jdglazer.shp2igrd.generators.SerializedGridDataFileGenerator;
 import com.jdglazer.shp2igrd.shp.InvalidFileTypeException;
 import com.jdglazer.shp2igrd.shp.PolygonShapeFile;
@@ -28,6 +30,8 @@ public class GridDataConversionOrquestratorTest {
 	
 	private final String DBF_FILE             = getClass().getResource("/PAgeol_dd/pageol_poly_dd.dbf").getPath();
 	
+	private final IndexProvider indexProvider = new GenericIndexProvider();
+	
 	private static final double LATITUDE_INTERVAL    = .00018;
 	
 	private static final double LONGITUDE_INTERVAL   = .00018;
@@ -38,7 +42,7 @@ public class GridDataConversionOrquestratorTest {
 		ConverterSettingsLoader.setTempFolderPath("/home/jglazer/Documents");
 		orquestrator = new GridDataConversionOrquestrator( 
 				   POLYGON_SHAPE_FILE, 
-				   DBF_FILE, 
+				   indexProvider,
 				   LATITUDE_INTERVAL,
 				   LONGITUDE_INTERVAL,
 				   2

@@ -21,6 +21,7 @@ import com.jdglazer.shp2igrd.ConversionProgressDTO;
 import com.jdglazer.shp2igrd.ConverterSettingsLoader;
 import com.jdglazer.shp2igrd.converters.ConversionWorkerTask;
 import com.jdglazer.shp2igrd.converters.Orquestrator;
+import com.jdglazer.shp2igrd.converters.index.IndexProvider;
 import com.jdglazer.shp2igrd.dbf.DbfNormalizer;
 import com.jdglazer.shp2igrd.generators.SerializedGridDataFileGenerator;
 import com.jdglazer.shp2igrd.shp.PolygonShapeFile;
@@ -38,7 +39,7 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 	
 	private PolygonShapeFile polygonShapeFile;
 	
-	private DbfNormalizer dbfNormalizer;
+	private IndexProvider indexProvider;
 	
 	private ArrayList<String> serializedDataFiles = new ArrayList<String>();
 	
@@ -53,7 +54,7 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 	// back as finished or failed. Then we remove it from here as a well
 	private ArrayList<ConversionWorkerTask> runningTasks = new ArrayList<ConversionWorkerTask>();
 	
-	public GridDataConversionOrquestrator( String polygonShapeFilePath, String dbfPath, double latInterval, double lonInterval, int indexIdentifier ) throws IOException {
+	public GridDataConversionOrquestrator( String polygonShapeFilePath, IndexProvider indexProvider, double latInterval, double lonInterval, int indexIdentifier ) throws IOException {
 		BasicConfigurator.configure();
 		try {
 			polygonShapeFile = new PolygonShapeFile( new ShapeFile ( polygonShapeFilePath ) );
@@ -61,13 +62,9 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 			logger.error( "Error reading polygon shape file. File may not exists: "+polygonShapeFilePath );
 			throw new IOException();
 		}
-		try {
-			dbfNormalizer = new DbfNormalizer( new File( dbfPath ) );
-		} catch ( Exception e ) {
-			logger.error("Error reading dbf file. File may not exist: "+dbfPath);
-			throw new IOException();
-		}
 		gridDataDTO.setGridDataHeader( new GridDataHeaderDTO( ) );
+		
+		this.indexProvider = indexProvider;
 		// Let's initialize all tasks and queue them up
 		setupTaskQueue(latInterval,lonInterval,indexIdentifier);
 	}
@@ -90,7 +87,7 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 			startIndex = 0;
 		for( int j = 1; j <= gridLineThreadCount ; j++ ) {
 			int endIndex = gridLineThreadCount == j ? latitudeLineCount - 1: startIndex + linesPerThread - 1;
-			lineConverters.add( new GridLineConversionWorkerTask(polygonShapeFile,startIndex,endIndex,lonInterval,latInterval) );
+			lineConverters.add( new GridLineConversionWorkerTask(polygonShapeFile,indexProvider,startIndex,endIndex,lonInterval,latInterval) );
 			startIndex = endIndex + 1;
 		}
 		taskQueue.add(lineConverters);

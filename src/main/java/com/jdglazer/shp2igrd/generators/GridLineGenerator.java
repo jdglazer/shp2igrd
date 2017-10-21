@@ -8,6 +8,7 @@ import java.util.Comparator;
 
 import com.jdglazer.igrd.grid.GridDataLineDTO;
 import com.jdglazer.igrd.utils.GridSegmentShortOverflowDTO;
+import com.jdglazer.shp2igrd.converters.index.IndexProvider;
 import com.jdglazer.shp2igrd.shp.InvalidFileTypeException;
 import com.jdglazer.shp2igrd.shp.PolygonShapeFile;
 import com.jdglazer.shp2igrd.shp.RecordOutOfBoundsException;
@@ -17,8 +18,11 @@ public class GridLineGenerator {
 	
 	private PolygonShapeFile pShapeFile;
 	
-	public GridLineGenerator( PolygonShapeFile psf ) {
+	private IndexProvider indexProvider;
+	
+	public GridLineGenerator( PolygonShapeFile psf, IndexProvider indexProvider ) {
 		pShapeFile = psf;
+		this.indexProvider = indexProvider;
 	}
 	
 	public GridDataLineDTO generateLine( double latitude, double lonInterval ) {
@@ -54,7 +58,8 @@ public class GridLineGenerator {
 				GridSegmentShortOverflowDTO sodto = GridSegmentShortOverflowDTO.getOverflowDTO(intersectionCount, partDTO.getSegmentCount(), gridLineRecordDTO.getNumberParts());
 				longitude = ( (double) intersectionCount ) * lonInterval + longitude;
 				GridDataLineDTO.SegmentDTO segmentDTO = gridLineRecordDTO.new SegmentDTO();
-				segmentDTO.setSegmentIndex(intersection1.index);
+				short normalizedIndex = (short) indexProvider.provideNormalizedDbfIndex(intersection1.index);
+				segmentDTO.setSegmentIndex( normalizedIndex );
 				segmentDTO.setSegmentLength((short)intersectionCount);
 				partDTO.addSegment(segmentDTO);
 				if( sodto != null ) {
@@ -198,57 +203,5 @@ public class GridLineGenerator {
 			this.latitude = latitude ;
 			this.longitude = longitude;
 		}
-	}
-	
-	public static void main( String [] args ) throws FileNotFoundException, InvalidFileTypeException, IOException, RecordOutOfBoundsException, Exception {
-
-		Runnable run1 = new Runnable() {
-			GridLineGenerator glg = new GridLineGenerator( new PolygonShapeFile( new ShapeFile( "/home/jglazer/Downloads/PAgeol_dd/pageol_poly_dd" ) ) );
-			public void run() {
-				for( double i = 0.0; i < 1.0 ; i++ ) {
-					GridDataLineDTO gdl = glg.generateLine( 40.657+i*.00018, .00018 );
-					System.out.println( "Part count: " + gdl.getNumberParts() );
-					System.out.println( "Segment count: " + gdl.getPart(0).getSegmentCount() );
-					System.out.println( "Segment 145 point count: " + gdl.getPart(0).getSegment(145).getSegmentLength() );
-					System.out.println( "Part count: " + gdl.getNumberParts() );
-					System.out.println( "Part 0 start longitude: " + gdl.getPart(0).getStartLongitude() );
-					System.out.println( "Out of line point count: " + gdl.getPart(0).getPointCount() );
-					System.out.println( "Expected Point Count: "+(-75.19543835004856 + 80.51917)/.00018 );
-				}
-			}
-		};
-		
-		Runnable run2 = new Runnable() {
-			GridLineGenerator glg = new GridLineGenerator( new PolygonShapeFile( new ShapeFile( "/home/jglazer/Downloads/PAgeol_dd/pageol_poly_dd" ) ) );
-			public void run() {
-				for( double i = 0.0; i < 66.0 ; i++ ) {
-					glg.generateLine( 40.675+i*.00018, .00018 );
-					System.out.println(i);
-				}
-			}
-		};
-		
-		Runnable run3 = new Runnable() {
-			GridLineGenerator glg = new GridLineGenerator( new PolygonShapeFile( new ShapeFile( "/home/jglazer/Downloads/PAgeol_dd/pageol_poly_dd" ) ) );
-			public void run() {
-				for( double i = 0.0; i < 67.0 ; i++ ) {
-					glg.generateLine( 40.675+i*.00018, .00018 );
-					System.out.println(i);
-				}
-			}
-		};
-		
-		Thread thread1 = new Thread( run1 );
-		Thread thread2 = new Thread( run2 );
-		Thread thread3 = new Thread( run3 );
-		long time = System.currentTimeMillis();
-		thread1.start();
-		//thread2.start();
-		//thread3.start();
-		do {
-			Thread.sleep( 100 );
-		} while ( thread1.isAlive() || thread2.isAlive() || thread3.isAlive());
-		System.out.println( System.currentTimeMillis() - time );
-		//glg.getIntersections(40.657, 6603);
 	}
 }

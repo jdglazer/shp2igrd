@@ -14,7 +14,9 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import com.jdglazer.igrd.IGRDCommonDTO;
+import com.jdglazer.igrd.grid.GridDataDTO;
 import com.jdglazer.igrd.grid.GridDataHeaderDTO;
+import com.jdglazer.igrd.grid.GridDataLineDTO;
 import com.jdglazer.shp2igrd.ConversionProgressDTO;
 import com.jdglazer.shp2igrd.ConverterSettingsLoader;
 import com.jdglazer.shp2igrd.converters.ConversionWorkerTask;
@@ -32,7 +34,7 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 	
 	private static String ORQUESTRATOR_TYPE = "grid";
 	
-	private GridDataHeaderDTO gridDataHeader = new GridDataHeaderDTO();
+	private GridDataDTO gridDataDTO = new GridDataDTO();
 	
 	private PolygonShapeFile polygonShapeFile;
 	
@@ -65,6 +67,7 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 			logger.error("Error reading dbf file. File may not exist: "+dbfPath);
 			throw new IOException();
 		}
+		gridDataDTO.setGridDataHeader( new GridDataHeaderDTO( ) );
 		// Let's initialize all tasks and queue them up
 		setupTaskQueue(latInterval,lonInterval,indexIdentifier);
 	}
@@ -72,7 +75,7 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 	private void setupTaskQueue(double latInterval, double lonInterval, int indexIdentifier) {
 		// Add the first set of concurrent tasks - builds the parts of the header it can
 		ArrayList<ConversionWorkerTask> workers = new ArrayList<ConversionWorkerTask>();
-		workers.add( new GridDataHeaderConversionStage1WorkerTask( polygonShapeFile, gridDataHeader, latInterval, lonInterval, indexIdentifier ) );
+		workers.add( new GridDataHeaderConversionStage1WorkerTask( polygonShapeFile, gridDataDTO.getGridDataHeader(), latInterval, lonInterval, indexIdentifier ) );
 		taskQueue.add(workers);
 		
 		// Adds second set of conversion workers
@@ -103,11 +106,9 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 		taskQueue.add(finishGridWriter);
 	}
 	
-	public byte [] fetchBinary(int chunkSize) {
+	public void writeToFile( File file ) {
 		if( !done() && !success() )
-			return null;
-		
-		return null;
+			;
 	}
 
 	public synchronized void addTaskToQueue(ConversionWorkerTask[] workerTask) {
@@ -162,6 +163,10 @@ public class GridDataConversionOrquestrator implements Orquestrator {
 
 	public void onWorkerFinished(ConversionWorkerTask finishedWorker) {
 		if( runningTasks.remove( finishedWorker ) ) {
+			if ( finishedWorker instanceof GridLineConversionWorkerTask ) {
+				ArrayList<GridDataLineDTO> lineDTOS = ( (GridLineConversionWorkerTask) finishedWorker ).getConversionOutput();
+				gridDataDTO.addGridDataLines(lineDTOS);
+			}
 			logger.info( "Removed a successfully completed worker task" );
 		} else {
 			logger.warn("Finished conversion worker not found on running workers list");

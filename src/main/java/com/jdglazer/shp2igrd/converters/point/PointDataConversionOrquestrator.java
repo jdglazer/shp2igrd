@@ -1,5 +1,6 @@
 package com.jdglazer.shp2igrd.converters.point;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import com.jdglazer.igrd.IGRDCommonDTO;
@@ -8,11 +9,6 @@ import com.jdglazer.shp2igrd.converters.ConversionWorkerTask;
 import com.jdglazer.shp2igrd.converters.Orquestrator;
 
 public class PointDataConversionOrquestrator implements Orquestrator {
-
-	public byte[] fetchBinary(int chunkSize) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	public void addTaskToQueue(ConversionWorkerTask[] workerTask) {
 		// TODO Auto-generated method stub
@@ -52,6 +48,11 @@ public class PointDataConversionOrquestrator implements Orquestrator {
 	public boolean success() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	public void writeToFile(File file) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

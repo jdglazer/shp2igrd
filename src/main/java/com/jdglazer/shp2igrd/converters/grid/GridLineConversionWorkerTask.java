@@ -68,4 +68,8 @@ public class GridLineConversionWorkerTask implements ConversionWorkerTask {
 		
 	}
 
+	public ArrayList<GridDataLineDTO> getConversionOutput() {
+		return gridDataLines;
+	}
+
 }

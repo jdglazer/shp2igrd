@@ -23,4 +23,5 @@ public interface ConversionWorkerTask {
 	 * @param dtoList
 	 */
 	public void addFinalConversionOutput( ArrayList<IGRDCommonDTO> dtoList );
+	
 }

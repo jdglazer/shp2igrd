@@ -1,5 +1,6 @@
 package com.jdglazer.shp2igrd.converters;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import com.jdglazer.igrd.IGRDCommonDTO;
@@ -9,9 +10,10 @@ public interface Orquestrator {
 	
 	/**
 	 * A function called to get the the raw igrd data once the conversion task is complete
-	 * should return an empty array or null if the conversion is not complete
+	 * Fills array given with the data to be written to the offset returned. It will shorten 
+	 * the array if the total remaining data is less than the size of the array
 	 */
-	public byte [] fetchBinary( int chunkSize );
+	public void writeToFile( File file );
 	/** 
 	 * A function that the main conversion thread will call periodically to give the 
 	 * orchestrator a chance to queue new conversion tasks when old ones have gone to 
